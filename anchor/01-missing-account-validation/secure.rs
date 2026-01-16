@@ -2,20 +2,29 @@ use anchor_lang::prelude::*;
 
 declare_id!("Good11111111111111111111111111111111111111");
 
+const MAX_NAME_LENGTH: usize = 50;
+
 #[program]
 pub mod missing_account_validation_secure {
     use super::*;
 
-    /// ✅ SECURE INSTRUCTION
+    /// ✅ SECURE VERSION
     ///
-    /// This instruction updates a user's profile name,
-    /// but now enforces proper ownership and authority checks.
+    /// Updates a user profile name with proper ownership validation.
     pub fn update_profile(
         ctx: Context<UpdateProfile>,
         new_name: String,
     ) -> Result<()> {
-        let profile = &mut ctx.accounts.profile;
+        require!(
+            new_name.len() <= MAX_NAME_LENGTH,
+            ProgramError::InvalidNameLength
+        );
+        require!(
+            !new_name.trim().is_empty(),
+            ProgramError::EmptyName
+        );
 
+        let profile = &mut ctx.accounts.profile;
         profile.name = new_name;
 
         Ok(())
@@ -24,16 +33,14 @@ pub mod missing_account_validation_secure {
 
 #[derive(Accounts)]
 pub struct UpdateProfile<'info> {
-    /// ✅ FIX:
-    /// - `has_one = owner` ensures the profile belongs to the signer
-    /// - `mut` allows safe mutation
+    /// ✅ Ownership and authority enforced
     #[account(
         mut,
         has_one = owner
     )]
     pub profile: Account<'info, UserProfile>,
 
-    /// ✅ The signer who owns the profile
+    /// ✅ Authorized signer
     pub owner: Signer<'info>,
 }
 
@@ -41,4 +48,12 @@ pub struct UpdateProfile<'info> {
 pub struct UserProfile {
     pub owner: Pubkey,
     pub name: String,
+}
+
+#[error_code]
+pub enum ProgramError {
+    #[msg("Name cannot exceed 50 characters")]
+    InvalidNameLength,
+    #[msg("Name cannot be empty")]
+    EmptyName,
 }
