@@ -20,7 +20,7 @@ An attacker can exploit this vulnerability by:
 
 Since the program does not enforce ownership or authority, the transaction succeeds even though the caller is **not authorized** to modify the account.
 
-This type of exploit requires no complex attack techniques — it relies entirely on the program trusting user-supplied accounts.
+This type of exploit requires no complex attack techniques it relies entirely on the program trusting user-supplied accounts.
 
 ---
 
@@ -75,3 +75,4 @@ Together, these constraints prevent unauthorized users from modifying accounts t
 > **If you do not explicitly validate accounts, Solana will not do it for you.**
 
 Always assume attackers fully control the accounts they pass into your program unless you prove otherwise through explicit validation.
+
